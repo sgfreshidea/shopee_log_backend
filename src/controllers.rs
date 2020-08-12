@@ -77,7 +77,9 @@ pub async fn set_keywords_to_stats(
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
 
-    stats.keywords = ss;
+    if stats.keywords.is_empty() {
+        stats.keywords = ss;
+    }
 
     Ok(warp::reply::json(&json!({
         "type": "success",
