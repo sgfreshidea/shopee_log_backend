@@ -1,0 +1,15 @@
+[package]
+name = "shopee_logs_collector"
+version = "0.1.0"
+authors = ["Shirshak <8097377+shirshak55@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+warp = "0.2.4"
+tokio = {version="0.2.22",features=["full"]}
+tracing = "0.1.19"
+tracing-subscriber = "0.2.11"
+serde = {version = "1.0.115", features=["derive"]}
+serde_json = "1.0.57"
