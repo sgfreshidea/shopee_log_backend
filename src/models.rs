@@ -51,5 +51,6 @@ pub struct KeywordStat {
     pub running: Option<bool>,
     pub error_counts: Option<u64>,
     pub ads_running: Option<bool>,
+    pub ads_position: Option<u64>,
     pub logs: Option<Vec<MainLog>>,
 }

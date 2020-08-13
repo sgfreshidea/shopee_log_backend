@@ -155,6 +155,10 @@ pub async fn update_keyword_stat(
             if ss.ads_running.is_some() {
                 keyword.ads_running = ss.ads_running
             }
+
+            if ss.ads_position.is_some() {
+                keyword.ads_position = ss.ads_position
+            }
         }
     }
 
