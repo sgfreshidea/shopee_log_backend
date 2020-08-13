@@ -46,6 +46,7 @@ pub struct MainLog {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct KeywordStat {
     pub id: u64,
+    pub name: Option<String>,
     pub keyword: Option<String>,
     pub placement: Option<u64>,
     pub running: Option<bool>,
