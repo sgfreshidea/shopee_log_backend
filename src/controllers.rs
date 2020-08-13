@@ -77,8 +77,22 @@ pub async fn set_keywords_to_stats(
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
 
-    if stats.keywords.is_empty() {
-        stats.keywords = ss;
+    for ii in ss.iter() {
+        let mut pushed = false;
+
+        for mut jj in stats.keywords.iter_mut() {
+            if ii.id == jj.id {
+                pushed = true;
+                jj.running = ii.running;
+                jj.logs
+                    .as_mut()
+                    .map(|v| v.extend_from_slice(&ii.logs.as_ref().unwrap_or(&vec![])));
+            }
+        }
+
+        if pushed == false {
+            stats.keywords.push(ii.clone());
+        }
     }
 
     Ok(warp::reply::json(&json!({
