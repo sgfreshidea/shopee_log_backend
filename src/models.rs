@@ -7,6 +7,20 @@ use tokio::sync::Mutex;
 pub type Db = Arc<Mutex<HashMap<String, Stat>>>;
 
 pub fn blank_db() -> Db {
+    let aa = std::env::var("JSON_FILE_PATH");
+    let bb = std::env::var("ACCOUNT_NAME");
+
+    if aa.is_ok() && bb.is_ok() {
+        let ff = std::fs::File::open(aa.unwrap()).unwrap();
+
+        let json = serde_json::from_reader(ff).unwrap();
+
+        let mut hm = HashMap::new();
+        hm.insert(bb.unwrap(), json);
+
+        return Arc::new(Mutex::new(hm));
+    }
+
     Arc::new(Mutex::new(HashMap::new()))
 }
 
@@ -14,6 +28,9 @@ pub fn blank_db() -> Db {
 pub struct Stat {
     pub error_counts: u64,
     pub running: bool,
+    pub no_api_calls: u64,
+    pub started_at: String,
+    pub last_updated_at: String,
     pub logs: Vec<MainLog>,
     pub keywords: Vec<KeywordStat>,
 }
@@ -23,6 +40,9 @@ impl Stat {
         Stat {
             error_counts: 0,
             running: false,
+            no_api_calls: 0,
+            started_at: crate::helpers::current_time_string(),
+            last_updated_at: crate::helpers::current_time_string(),
             logs: Vec::new(),
             keywords: Vec::new(),
         }
@@ -33,6 +53,9 @@ impl Stat {
 pub struct UpdateStat {
     pub error_counts: Option<u64>,
     pub running: Option<bool>,
+
+    // How many api calls were made since last updated
+    pub no_of_api_call_diff: Option<u64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -46,6 +69,7 @@ pub struct MainLog {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct KeywordStat {
     pub id: u64,
+    pub last_updated_at: Option<String>,
     pub name: Option<String>,
     pub keyword: Option<String>,
     pub placement: Option<u64>,
