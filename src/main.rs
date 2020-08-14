@@ -34,30 +34,30 @@ fn service_main(_arguments: Vec<OsString>) {
         };
 
     let status_handle = service_control_handler::register(SERVICE_NAME, event_handler).unwrap();
-    status_handle
-        .set_service_status(service::ServiceStatus {
-            service_type: SERVICE_TYPE,
-            current_state: service::ServiceState::Running,
-            controls_accepted: service::ServiceControlAccept::STOP,
-            exit_code: service::ServiceExitCode::Win32(0),
-            checkpoint: 0,
-            wait_hint: Duration::default(),
-        })
-        .unwrap();
 
+    let next_status = service::ServiceStatus {
+        service_type: SERVICE_TYPE,
+        current_state: service::ServiceState::Running,
+        controls_accepted: service::ServiceControlAccept::STOP,
+        exit_code: service::ServiceExitCode::Win32(0),
+        checkpoint: 0,
+        wait_hint: Duration::default(),
+    };
+
+    status_handle.set_service_status(next_status).unwrap();
     run_server();
 
-    // In future we can pass oneshot channel
-    status_handle
-        .set_service_status(service::ServiceStatus {
-            service_type: SERVICE_TYPE,
-            current_state: service::ServiceState::Stopped,
-            controls_accepted: service::ServiceControlAccept::empty(),
-            exit_code: service::ServiceExitCode::Win32(0),
-            checkpoint: 0,
-            wait_hint: Duration::default(),
-        })
-        .unwrap();
+    // // In future we can pass oneshot channel
+    // status_handle
+    //     .set_service_status(service::ServiceStatus {
+    //         service_type: SERVICE_TYPE,
+    //         current_state: service::ServiceState::Stopped,
+    //         controls_accepted: service::ServiceControlAccept::empty(),
+    //         exit_code: service::ServiceExitCode::Win32(0),
+    //         checkpoint: 0,
+    //         wait_hint: Duration::default(),
+    //     })
+    //     .unwrap();
 }
 
 pub mod controllers;
