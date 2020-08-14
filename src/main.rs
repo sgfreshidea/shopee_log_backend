@@ -42,6 +42,7 @@ fn service_main(_arguments: Vec<OsString>) {
         exit_code: service::ServiceExitCode::Win32(0),
         checkpoint: 0,
         wait_hint: Duration::default(),
+        process_id: None,
     };
 
     status_handle.set_service_status(next_status).unwrap();
@@ -56,6 +57,7 @@ fn service_main(_arguments: Vec<OsString>) {
     //         exit_code: service::ServiceExitCode::Win32(0),
     //         checkpoint: 0,
     //         wait_hint: Duration::default(),
+    //         process_id: None,
     //     })
     //     .unwrap();
 }
