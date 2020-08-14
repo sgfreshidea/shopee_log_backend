@@ -2,6 +2,10 @@ use tracing_subscriber::fmt::format::FmtSpan;
 use warp::Filter;
 
 #[cfg(windows)]
+use std::ffi::OsString;
+#[cfg(windows)]
+use std::time::Duration;
+#[cfg(windows)]
 use windows_service::service;
 #[cfg(windows)]
 use windows_service::service_control_handler;
@@ -10,7 +14,7 @@ use windows_service::service_control_handler;
 windows_service::define_windows_service!(service_entry_point, service_main);
 
 #[cfg(windows)]
-const SERVICE_NAME: &str = "Loggest";
+const SERVICE_NAME: &str = "Shopee Log Collector";
 #[cfg(windows)]
 const SERVICE_TYPE: service::ServiceType = service::ServiceType::OWN_PROCESS;
 
@@ -56,12 +60,6 @@ fn service_main(_arguments: Vec<OsString>) {
         .unwrap();
 }
 
-#[cfg(windows)]
-fn main() -> Result<(), windows_service::Error> {
-    windows_service::service_dispatcher::start(SERVICE_NAME, service_entry_point)?;
-    Ok(())
-}
-
 pub mod controllers;
 pub mod helpers;
 pub mod models;
@@ -70,6 +68,11 @@ pub mod routes;
 #[cfg(unix)]
 fn main() {
     run_server();
+}
+
+#[cfg(windows)]
+fn main() {
+    windows_service::service_dispatcher::start(SERVICE_NAME, service_entry_point).unwrap();
 }
 
 fn run_server() {
