@@ -120,7 +120,7 @@ pub async fn set_keywords_to_stats(
 
                 let mut kwl = keyword_db.lock().await;
                 let keyword_hm_key = format!("{}{}", account, jj.id);
-                let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::new());
+                let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::with_capacity(100));
 
                 if ii.logs.is_none() {
                     let slice = ii.logs.as_ref().unwrap();
@@ -174,7 +174,7 @@ pub async fn add_logs_to_keyword(
 
             let mut kwl = keyword_db.lock().await;
             let keyword_hm_key = format!("{}{}", account, id);
-            let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::new());
+            let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::with_capacity(100));
 
             keyword.log_counts += 1;
             keyword_logs.push(ss.clone());
