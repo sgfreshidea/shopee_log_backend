@@ -50,11 +50,13 @@ fn create_app() -> App<'static, 'static> {
         .arg(
             Arg::with_name("port")
                 .short("p")
+                .long("port")
                 .required(true)
                 .help("Set Port to listen to"),
         )
         .arg(
             Arg::with_name("html_path")
+                .long("html_path")
                 .required(true)
                 .help("Set html path which shall be served as homepage"),
         );
