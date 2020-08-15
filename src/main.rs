@@ -67,6 +67,9 @@ fn run_server(config: &cli::Config) -> Result<(), String> {
 
     let mut rt = tokio::runtime::Runtime::new().map_err(|_| "Couldn't start runtime")?;
 
+    println!("Listening on port {}", port);
+    println!("Serving {}", config.html_path);
+
     rt.block_on(warp::serve(routes).run(([127, 0, 0, 1], port)));
 
     Ok(())
