@@ -100,7 +100,5 @@ pub fn add_logs_to_keywords(
 }
 
 fn with_db(db: Db) -> impl Filter<Extract = (Db,), Error = std::convert::Infallible> + Clone {
-    tracing::info!("Using database");
-
     warp::any().map(move || db.clone())
 }
