@@ -1,4 +1,4 @@
-use crate::models::{KeywordDb, KeywordStat, MainLog, Stat, StatsDb, UpdateStat};
+use crate::models::{KeywordDb, KeywordStat, KeywordStatInput, MainLog, Stat, StatsDb, UpdateStat};
 use serde_json::json;
 use std::convert::Infallible;
 use std::fs::File;
@@ -99,7 +99,7 @@ pub async fn add_logs_to_stats(
 
 pub async fn set_keywords_to_stats(
     account: String,
-    input: Vec<KeywordStat>,
+    input: Vec<KeywordStatInput>,
     db: StatsDb,
     keyword_db: KeywordDb,
 ) -> Result<impl warp::Reply, Infallible> {
@@ -128,7 +128,17 @@ pub async fn set_keywords_to_stats(
         }
 
         if pushed == false {
-            stats.keywords.push(ii.clone());
+            stats.keywords.push(KeywordStat {
+                id: ii.id,
+                last_updated_at: crate::helpers::current_time_string(),
+                name: ii.name,
+                keyword: ii.keyword,
+                placement: ii.placement,
+                running: ii.running,
+                error_counts: ii.error_counts,
+                ads_running: ii.ads_running,
+                ads_position: ii.ads_position,
+            });
         }
     }
 

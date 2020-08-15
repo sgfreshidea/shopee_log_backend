@@ -82,5 +82,18 @@ pub struct KeywordStat {
     pub error_counts: Option<u64>,
     pub ads_running: Option<bool>,
     pub ads_position: Option<u64>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct KeywordStatInput {
+    pub id: u64,
+    pub last_updated_at: Option<String>,
+    pub name: Option<String>,
+    pub keyword: Option<String>,
+    pub placement: Option<u64>,
+    pub running: Option<bool>,
+    pub error_counts: Option<u64>,
+    pub ads_running: Option<bool>,
+    pub ads_position: Option<u64>,
     pub logs: Option<Vec<MainLog>>,
 }
