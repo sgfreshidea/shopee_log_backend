@@ -138,7 +138,7 @@ pub async fn set_keywords_to_stats(
                 keyword: ii.keyword.clone(),
                 placement: ii.placement,
                 running: ii.running,
-                error_counts: ii.error_counts,
+                error_counts: 0,
                 log_counts: 0,
                 ads_running: ii.ads_running,
                 ads_position: ii.ads_position,
@@ -180,9 +180,7 @@ pub async fn add_logs_to_keyword(
             keyword_logs.push(ss.clone());
 
             if ss.r#type == "error" {
-                let current_count = keyword.error_counts.as_ref().unwrap_or(&0);
-
-                keyword.error_counts = Some(*current_count + 1);
+                keyword.error_counts = keyword.error_counts + 1;
             }
         }
     }
