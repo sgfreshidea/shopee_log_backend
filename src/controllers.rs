@@ -1,10 +1,10 @@
-use crate::models::{Db, KeywordStat, MainLog, Stat, UpdateStat};
+use crate::models::{KeywordDb, KeywordStat, MainLog, Stat, StatsDb, UpdateStat};
 use serde_json::json;
 use std::convert::Infallible;
 use std::fs::File;
 use std::io::prelude::*;
 
-pub async fn list_accounts(db: Db) -> Result<impl warp::Reply, Infallible> {
+pub async fn list_accounts(db: StatsDb) -> Result<impl warp::Reply, Infallible> {
     let lock = db.lock().await;
 
     let keys = lock.keys().into_iter().collect::<Vec<&String>>();
@@ -13,14 +13,26 @@ pub async fn list_accounts(db: Db) -> Result<impl warp::Reply, Infallible> {
     Ok(warp::reply::json(&json))
 }
 
-pub async fn stats(account: String, db: Db) -> Result<impl warp::Reply, Infallible> {
+pub async fn get_keyword_logs(
+    account: String,
+    keyword_id: u64,
+    db: KeywordDb,
+) -> Result<impl warp::Reply, Infallible> {
+    let key = format!("{}{}", account, keyword_id);
+
+    let mut lock = db.lock().await;
+    let stats = lock.entry(key).or_insert(Vec::new());
+    Ok(warp::reply::json(&*stats))
+}
+
+pub async fn stats(account: String, db: StatsDb) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
 
     Ok(warp::reply::json(&*stats))
 }
 
-pub async fn clear_log(account: String, db: Db) -> Result<impl warp::Reply, Infallible> {
+pub async fn clear_log(account: String, db: StatsDb) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
 
@@ -39,7 +51,7 @@ pub async fn clear_log(account: String, db: Db) -> Result<impl warp::Reply, Infa
 pub async fn update_stats(
     account: String,
     ss: UpdateStat,
-    db: Db,
+    db: StatsDb,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
@@ -66,7 +78,7 @@ pub async fn update_stats(
 pub async fn add_logs_to_stats(
     account: String,
     ss: MainLog,
-    db: Db,
+    db: StatsDb,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
@@ -87,24 +99,31 @@ pub async fn add_logs_to_stats(
 
 pub async fn set_keywords_to_stats(
     account: String,
-    ss: Vec<KeywordStat>,
-    db: Db,
+    input: Vec<KeywordStat>,
+    db: StatsDb,
+    keyword_db: KeywordDb,
 ) -> Result<impl warp::Reply, Infallible> {
-    let mut lock = db.lock().await;
-    let stats = lock.entry(account).or_insert(Stat::new());
+    let mut dbl = db.lock().await;
+    let stats = dbl.entry(account.clone()).or_insert(Stat::new());
 
     stats.last_updated_at = crate::helpers::current_time_string();
 
-    for ii in ss.iter() {
+    for ii in input.iter() {
         let mut pushed = false;
 
         for mut jj in stats.keywords.iter_mut() {
             if ii.id == jj.id {
                 pushed = true;
                 jj.running = ii.running;
-                jj.logs
-                    .as_mut()
-                    .map(|v| v.extend_from_slice(&ii.logs.as_ref().unwrap_or(&vec![])));
+
+                let mut kwl = keyword_db.lock().await;
+                let keyword_hm_key = format!("{}{}", account, jj.id);
+                let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::new());
+
+                if ii.logs.is_none() {
+                    let slice = ii.logs.as_ref().unwrap();
+                    keyword_logs.extend_from_slice(&slice);
+                }
             }
         }
 
@@ -123,10 +142,11 @@ pub async fn add_logs_to_keyword(
     account: String,
     id: u64,
     ss: MainLog,
-    db: Db,
+    db: StatsDb,
+    keyword_db: KeywordDb,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
-    let stats = lock.entry(account).or_insert(Stat::new());
+    let stats = lock.entry(account.clone()).or_insert(Stat::new());
 
     stats.last_updated_at = crate::helpers::current_time_string();
 
@@ -136,13 +156,11 @@ pub async fn add_logs_to_keyword(
 
     for keyword in stats.keywords.iter_mut() {
         if keyword.id == id {
-            if keyword.logs.is_none() {
-                keyword.logs = Some(vec![ss.clone()]);
-            } else {
-                keyword.logs.as_mut().map(|v| {
-                    v.push(ss.clone());
-                });
-            }
+            let mut kwl = keyword_db.lock().await;
+            let keyword_hm_key = format!("{}{}", account, id);
+            let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::new());
+
+            keyword_logs.push(ss.clone());
 
             keyword.last_updated_at = Some(crate::helpers::current_time_string());
 
@@ -163,7 +181,7 @@ pub async fn add_logs_to_keyword(
 pub async fn update_keyword_stat(
     account: String,
     ss: KeywordStat,
-    db: Db,
+    db: StatsDb,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());

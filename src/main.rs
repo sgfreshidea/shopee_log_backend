@@ -59,8 +59,8 @@ fn run_server(config: &cli::Config) -> Result<(), String> {
         .with_span_events(FmtSpan::CLOSE)
         .init();
 
-    let db = models::blank_db();
-    let api = routes::all(db);
+    let (stats_db, keywords_db) = models::blank_db();
+    let api = routes::all(stats_db, keywords_db);
 
     let fs = warp::fs::dir(config.html_path.to_owned());
 

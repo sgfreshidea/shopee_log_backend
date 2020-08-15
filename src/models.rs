@@ -4,24 +4,29 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-pub type Db = Arc<Mutex<HashMap<String, Stat>>>;
+pub type StatsDb = Arc<Mutex<HashMap<String, Stat>>>;
+pub type KeywordDb = Arc<Mutex<HashMap<String, Vec<MainLog>>>>;
 
-pub fn blank_db() -> Db {
-    let aa = std::env::var("JSON_FILE_PATH");
-    let bb = std::env::var("ACCOUNT_NAME");
+pub fn blank_db() -> (StatsDb, KeywordDb) {
+    // Todo: Loading for offline use
+    // let aa = std::env::var("JSON_FILE_PATH");
+    // let bb = std::env::var("ACCOUNT_NAME");
 
-    if aa.is_ok() && bb.is_ok() {
-        let ff = std::fs::File::open(aa.unwrap()).unwrap();
+    // if aa.is_ok() && bb.is_ok() {
+    //     let ff = std::fs::File::open(aa.unwrap()).unwrap();
 
-        let json = serde_json::from_reader(ff).unwrap();
+    //     let json = serde_json::from_reader(ff).unwrap();
 
-        let mut hm = HashMap::new();
-        hm.insert(bb.unwrap(), json);
+    //     let mut hm = HashMap::new();
+    //     hm.insert(bb.unwrap(), json);
 
-        return Arc::new(Mutex::new(hm));
-    }
+    //     return Arc::new(Mutex::new(hm));
+    // }
 
-    Arc::new(Mutex::new(HashMap::new()))
+    let stats_db = Arc::new(Mutex::new(HashMap::new()));
+    let keywords_db = Arc::new(Mutex::new(HashMap::new()));
+
+    (stats_db, keywords_db)
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
