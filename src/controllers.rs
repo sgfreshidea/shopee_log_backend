@@ -40,7 +40,11 @@ pub async fn clear_log(account: String, db: StatsDb) -> Result<impl warp::Reply,
 
     let content = serde_json::to_string_pretty(&mut *stats).unwrap();
 
-    let mut new_file = File::create(crate::helpers::current_time_string()).unwrap();
+    let mut new_file = File::create(crate::helpers::sanitize(
+        &crate::helpers::current_time_string(),
+    ))
+    .unwrap();
+
     new_file.write_all(&content.into_bytes()).unwrap();
 
     *stats = Stat::new();
