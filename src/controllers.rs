@@ -40,10 +40,8 @@ pub async fn clear_log(account: String, db: StatsDb) -> Result<impl warp::Reply,
 
     let content = serde_json::to_string_pretty(&mut *stats).unwrap();
 
-    let mut new_file = File::create(crate::helpers::sanitize(
-        &crate::helpers::current_time_string(),
-    ))
-    .unwrap();
+    let path = crate::helpers::sanitize(&crate::helpers::current_time_string()) + ".json";
+    let mut new_file = File::create(path).unwrap();
 
     new_file.write_all(&content.into_bytes()).unwrap();
 
@@ -194,12 +192,11 @@ pub async fn add_logs_to_keyword(
 
 pub async fn update_keyword_stat(
     account: String,
-    ss: KeywordStat,
+    ss: KeywordStatInput,
     db: StatsDb,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.lock().await;
     let stats = lock.entry(account).or_insert(Stat::new());
-
     stats.last_updated_at = crate::helpers::current_time_string();
 
     for keyword in stats.keywords.iter_mut() {

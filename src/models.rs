@@ -87,7 +87,6 @@ pub struct KeywordStat {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct KeywordStatInput {
     pub id: u64,
-    pub last_updated_at: Option<String>,
     pub name: Option<String>,
     pub keyword: Option<String>,
     pub placement: Option<u64>,
