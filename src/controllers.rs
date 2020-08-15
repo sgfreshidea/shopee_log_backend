@@ -125,6 +125,7 @@ pub async fn set_keywords_to_stats(
                 if ii.logs.is_none() {
                     let slice = ii.logs.as_ref().unwrap();
                     keyword_logs.extend_from_slice(&slice);
+                    jj.log_counts += slice.len() as u64;
                 }
             }
         }
@@ -138,6 +139,7 @@ pub async fn set_keywords_to_stats(
                 placement: ii.placement,
                 running: ii.running,
                 error_counts: ii.error_counts,
+                log_counts: 0,
                 ads_running: ii.ads_running,
                 ads_position: ii.ads_position,
             });
@@ -174,6 +176,7 @@ pub async fn add_logs_to_keyword(
             let keyword_hm_key = format!("{}{}", account, id);
             let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::new());
 
+            keyword.log_counts += 1;
             keyword_logs.push(ss.clone());
 
             if ss.r#type == "error" {

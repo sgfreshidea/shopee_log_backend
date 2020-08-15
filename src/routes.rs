@@ -111,7 +111,7 @@ pub fn get_keyword_logs(
     db: KeywordDb,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!(String / "keywords" / u64 / "logs")
-        .and(warp::post())
+        .and(warp::get())
         .and(with_keyword_db(db))
         .and_then(controllers::get_keyword_logs)
         .with(warp::trace::named("Route: Get Keyword Logs "))

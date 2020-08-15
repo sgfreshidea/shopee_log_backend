@@ -80,6 +80,7 @@ pub struct KeywordStat {
     pub placement: Option<u64>,
     pub running: Option<bool>,
     pub error_counts: Option<u64>,
+    pub log_counts: u64,
     pub ads_running: Option<bool>,
     pub ads_position: Option<u64>,
 }
