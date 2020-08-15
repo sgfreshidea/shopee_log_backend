@@ -33,7 +33,7 @@ pub fn create_config() -> Config {
         html_path: matches
             .value_of("html_path")
             .and_then(|v| Some(v.to_owned()))
-            .unwrap_or_else(|| "/Users/quantum/Desktop/code/shopee/out".to_owned()),
+            .unwrap(),
     }
 }
 
@@ -51,13 +51,15 @@ fn create_app() -> App<'static, 'static> {
             Arg::with_name("port")
                 .short("p")
                 .long("port")
-                .required(true)
+                .required(false)
+                .takes_value(true)
                 .help("Set Port to listen to"),
         )
         .arg(
             Arg::with_name("html_path")
                 .long("html_path")
                 .required(true)
+                .takes_value(true)
                 .help("Set html path which shall be served as homepage"),
         );
 
