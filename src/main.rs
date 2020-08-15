@@ -1,8 +1,8 @@
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::Filter;
 
-#[cfg(windows)]
-mod system_service;
+// #[cfg(windows)]
+// mod system_service;
 
 pub mod cli;
 pub mod controllers;
@@ -25,10 +25,27 @@ fn main() {
     std::process::exit(exit_code);
 }
 
-#[cfg(not(windows))]
+// #[cfg(not(windows))]
 fn run_platform(config: &cli::Config) -> Result<(), String> {
     run_server(config)
 }
+
+// #[cfg(windows)]
+// fn run_platform(config: &cli::Config) -> Result<(), String> {
+//     if config.run_as_service {
+//         println!("Running as service.");
+//         system_service::run()
+//     } else if config.register_service {
+//         let install_result = system_service::install_service().map_err(|e| e.display_chain());
+//         if install_result.is_ok() {
+//             println!("Installed the service.");
+//         }
+//         install_result
+//     } else {
+//         println!("Running Directly");
+//         run_server(config)
+//     }
+// }
 
 fn run_server(config: &cli::Config) -> Result<(), String> {
     let traces =
