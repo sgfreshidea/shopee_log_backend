@@ -51,12 +51,12 @@ fn create_app() -> App<'static, 'static> {
             Arg::with_name("port")
                 .short("p")
                 .required(true)
-                .help("Set level of verbosity"),
+                .help("Set Port to listen to"),
         )
         .arg(
             Arg::with_name("html_path")
                 .required(true)
-                .help("Set level of verbosity"),
+                .help("Set html path which shall be served as homepage"),
         );
 
     if cfg!(windows) {
