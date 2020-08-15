@@ -122,7 +122,7 @@ pub async fn set_keywords_to_stats(
                 let keyword_hm_key = format!("{}{}", account, jj.id);
                 let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::with_capacity(100));
 
-                if ii.logs.is_none() {
+                if ii.logs.is_some() {
                     let slice = ii.logs.as_ref().unwrap();
                     keyword_logs.extend_from_slice(&slice);
                     jj.log_counts += slice.len() as u64;
