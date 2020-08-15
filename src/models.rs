@@ -75,12 +75,13 @@ pub struct MainLog {
 pub struct KeywordStat {
     pub id: u64,
     pub last_updated_at: String,
-    pub name: Option<String>,
+    pub error_counts: u64,
+    pub log_counts: u64,
+    pub name: String,
+
     pub keyword: Option<String>,
     pub placement: Option<u64>,
     pub running: Option<bool>,
-    pub error_counts: u64,
-    pub log_counts: u64,
     pub ads_running: Option<bool>,
     pub ads_position: Option<u64>,
 }
@@ -88,7 +89,8 @@ pub struct KeywordStat {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct KeywordStatInput {
     pub id: u64,
-    pub name: Option<String>,
+    pub name: String,
+
     pub keyword: Option<String>,
     pub placement: Option<u64>,
     pub running: Option<bool>,
