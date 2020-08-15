@@ -131,8 +131,8 @@ pub async fn set_keywords_to_stats(
             stats.keywords.push(KeywordStat {
                 id: ii.id,
                 last_updated_at: crate::helpers::current_time_string(),
-                name: ii.name,
-                keyword: ii.keyword,
+                name: ii.name.clone(),
+                keyword: ii.keyword.clone(),
                 placement: ii.placement,
                 running: ii.running,
                 error_counts: ii.error_counts,
@@ -166,13 +166,13 @@ pub async fn add_logs_to_keyword(
 
     for keyword in stats.keywords.iter_mut() {
         if keyword.id == id {
+            keyword.last_updated_at = crate::helpers::current_time_string();
+
             let mut kwl = keyword_db.lock().await;
             let keyword_hm_key = format!("{}{}", account, id);
             let keyword_logs = kwl.entry(keyword_hm_key).or_insert(Vec::new());
 
             keyword_logs.push(ss.clone());
-
-            keyword.last_updated_at = Some(crate::helpers::current_time_string());
 
             if ss.r#type == "error" {
                 let current_count = keyword.error_counts.as_ref().unwrap_or(&0);
@@ -200,7 +200,7 @@ pub async fn update_keyword_stat(
 
     for keyword in stats.keywords.iter_mut() {
         if keyword.id == ss.id {
-            keyword.last_updated_at = Some(crate::helpers::current_time_string());
+            keyword.last_updated_at = crate::helpers::current_time_string();
 
             if ss.running.is_some() {
                 keyword.running = ss.running
