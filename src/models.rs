@@ -84,13 +84,14 @@ pub struct KeywordStat {
     pub running: Option<bool>,
     pub ads_running: Option<bool>,
     pub ads_position: Option<u64>,
+    pub current_price: Option<u64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct KeywordStatInput {
     pub id: u64,
     pub name: Option<String>,
-
+    pub current_price: Option<u64>,
     pub keyword: Option<String>,
     pub placement: Option<u64>,
     pub running: Option<bool>,

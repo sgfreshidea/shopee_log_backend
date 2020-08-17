@@ -142,6 +142,7 @@ pub async fn set_keywords_to_stats(
                 log_counts: 0,
                 ads_running: ii.ads_running,
                 ads_position: ii.ads_position,
+                current_price: ii.current_price,
             });
         }
     }
@@ -204,16 +205,21 @@ pub async fn update_keyword_stat(
         if keyword.id == ss.id {
             keyword.last_updated_at = crate::helpers::current_time_string();
 
-            if ss.running.is_some() {
-                keyword.running = ss.running
+            if let Some(ru) = ss.running {
+                keyword.running = Some(ru);
             }
 
+            // Todo use if let some feeling lazy atm.
             if ss.ads_running.is_some() {
                 keyword.ads_running = ss.ads_running
             }
 
             if ss.ads_position.is_some() {
                 keyword.ads_position = ss.ads_position
+            }
+
+            if let Some(cp) = ss.current_price {
+                keyword.current_price = Some(cp);
             }
         }
     }
