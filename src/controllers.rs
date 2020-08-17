@@ -73,7 +73,6 @@ pub async fn update_stats(
 
     Ok(warp::reply::json(&json!({
         "type": "success",
-        "data":{"stat": stats.clone()}
     })))
 }
 
@@ -95,7 +94,6 @@ pub async fn add_logs_to_stats(
 
     Ok(warp::reply::json(&json!({
         "type": "success",
-        "data":{"stat": stats.clone()}
     })))
 }
 
@@ -149,7 +147,6 @@ pub async fn set_keywords_to_stats(
 
     Ok(warp::reply::json(&json!({
         "type": "success",
-        "data":{"stat": stats.clone()}
     })))
 }
 
@@ -188,7 +185,6 @@ pub async fn add_logs_to_keyword(
 
     Ok(warp::reply::json(&json!({
         "type": "success",
-        "data":{"stat": stats.clone()}
     })))
 }
 
@@ -226,6 +222,5 @@ pub async fn update_keyword_stat(
 
     Ok(warp::reply::json(&json!({
         "type": "success",
-        "data":{"stat": stats.clone()}
     })))
 }
