@@ -38,11 +38,14 @@ pub async fn clear_log(
     db: StatsDb,
     keyword_db: KeywordDb,
 ) -> Result<impl warp::Reply, Infallible> {
+    use std::borrow::Cow;
+
     #[derive(Debug, Deserialize, Serialize, Clone)]
-    struct Backup {
-        stat: Stat,
-        keyword: Vec<MainLog>,
-    }
+    struct Backup<'a> {
+        stats: Cow<'a, Stat>,
+        keyword: Cow<'a, [MainLog]>,
+    };
+
     {
         let mut lock = db.lock().await;
         let stats = lock.entry(account.clone()).or_insert(Stat::new());
@@ -50,22 +53,16 @@ pub async fn clear_log(
         let mut klock = keyword_db.lock().await;
         let kstats = klock.entry(account.clone()).or_insert(Vec::new());
 
-        let content = serde_json::to_string_pretty(&kstats).unwrap();
+        let content = serde_json::to_string_pretty(&Backup {
+            stats: Cow::Borrowed(&*stats),
+            keyword: Cow::Borrowed(&*kstats),
+        })
+        .unwrap();
 
-        let path =
-            crate::helpers::sanitize(&crate::helpers::current_time_string()) + "_keyword_stat.json";
+        let path = crate::helpers::sanitize(&crate::helpers::current_time_string()) + ".json";
 
         let mut new_file = File::create(path).unwrap();
         new_file.write_all(&content.into_bytes()).unwrap();
-
-        // Fix duplicate issue
-        let stat_content = serde_json::to_string_pretty(&kstats).unwrap();
-
-        let stat_path =
-            crate::helpers::sanitize(&crate::helpers::current_time_string()) + "_global_stat.json";
-
-        let mut stat_new_file = File::create(stat_path).unwrap();
-        stat_new_file.write_all(&stat_content.into_bytes()).unwrap();
     }
 
     let mut klock = keyword_db.lock().await;
