@@ -1,4 +1,5 @@
 use crate::models::{KeywordDb, KeywordStat, KeywordStatInput, MainLog, Stat, StatsDb, UpdateStat};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::convert::Infallible;
 use std::fs::File;
@@ -32,22 +33,48 @@ pub async fn stats(account: String, db: StatsDb) -> Result<impl warp::Reply, Inf
     Ok(warp::reply::json(&*stats))
 }
 
-pub async fn clear_log(account: String, db: StatsDb) -> Result<impl warp::Reply, Infallible> {
-    let mut lock = db.lock().await;
-    let stats = lock.entry(account).or_insert(Stat::new());
+pub async fn clear_log(
+    account: String,
+    db: StatsDb,
+    keyword_db: KeywordDb,
+) -> Result<impl warp::Reply, Infallible> {
+    #[derive(Debug, Deserialize, Serialize, Clone)]
+    struct Backup {
+        stat: Stat,
+        keyword: Vec<MainLog>,
+    }
+    {
+        let mut lock = db.lock().await;
+        let stats = lock.entry(account.clone()).or_insert(Stat::new());
 
-    // Micro optimization is possible here.
+        let mut klock = keyword_db.lock().await;
+        let kstats = klock.entry(account.clone()).or_insert(Vec::new());
 
-    let content = serde_json::to_string_pretty(&mut *stats).unwrap();
+        let content = serde_json::to_string_pretty(&kstats).unwrap();
 
-    let path = crate::helpers::sanitize(&crate::helpers::current_time_string()) + ".json";
-    let mut new_file = File::create(path).unwrap();
+        let path =
+            crate::helpers::sanitize(&crate::helpers::current_time_string()) + "_keyword_stat.json";
 
-    new_file.write_all(&content.into_bytes()).unwrap();
+        let mut new_file = File::create(path).unwrap();
+        new_file.write_all(&content.into_bytes()).unwrap();
 
-    *stats = Stat::new();
+        // Fix duplicate issue
+        let stat_content = serde_json::to_string_pretty(&kstats).unwrap();
 
-    Ok(warp::reply::json(&*stats))
+        let stat_path =
+            crate::helpers::sanitize(&crate::helpers::current_time_string()) + "_global_stat.json";
+
+        let mut stat_new_file = File::create(stat_path).unwrap();
+        stat_new_file.write_all(&stat_content.into_bytes()).unwrap();
+    }
+
+    let mut klock = keyword_db.lock().await;
+    let kstats = klock.entry(account).or_insert(Vec::new());
+    *kstats = Vec::with_capacity(500);
+
+    Ok(warp::reply::json(&json!({
+        "type": "success",
+    })))
 }
 
 pub async fn update_stats(

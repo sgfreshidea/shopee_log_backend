@@ -7,7 +7,7 @@ pub fn all(
     keywords_db: KeywordDb,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     list_accounts(db.clone())
-        .or(clear_stat(db.clone()))
+        .or(clear_stat(db.clone(),keywords_db.clone()))
         .or(index_stats(db.clone()))
         .or(update_stats(db.clone()))
         .or(add_logs_to_stats(db.clone()))
@@ -20,10 +20,12 @@ pub fn all(
 
 pub fn clear_stat(
     db: StatsDb,
+    keyword_db: KeywordDb,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!(String / "clear_log")
         .and(warp::get())
         .and(with_db(db))
+        .and(with_keyword_db(keyword_db))
         .and_then(controllers::clear_log)
         .with(warp::trace::named("Route:Index Stats"))
 }
