@@ -4,9 +4,11 @@ This app is just a show case of how logging tool can make your life easy.
 
 ## Screenshots
 
-![first](rscreenshots/1.png?raw=true "First Part")
-![second](rscreenshots/2.png?raw=true "Second Part")
-![third](rscreenshots/3.png?raw=true "Detail View")
+![first](screenshots/1.png?raw=true "First Part")
+
+![second](screenshots/2.png?raw=true "Second Part")
+
+![third](screenshots/3.png?raw=true "Detail View")
 
 # How it works?
 
