@@ -1,4 +1,4 @@
-use crate::models::{Db, KeywordStatistics, Log, UpdateKeywordStat, UpdateStat};
+use crate::models::{Db, KeywordStatistics, Log, Statistics, UpdateKeywordStat, UpdateStat};
 use serde_json::json;
 use serde_json::Value::Null;
 use std::convert::Infallible;
@@ -67,6 +67,8 @@ pub async fn update_stats(
         if req.no_of_api_call_diff.is_some() {
             main_stats.no_api_calls += req.no_of_api_call_diff.unwrap();
         }
+    } else {
+        lock.insert(account.clone(), Statistics::new(account));
     }
 
     Ok(json(&json!({

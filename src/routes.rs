@@ -53,7 +53,7 @@ pub fn update_stats(
         .and(warp::filters::body::json())
         .and(with_db(db))
         .and_then(controllers::update_stats)
-        .with(warp::trace::named("Route: Update Stat"))
+        .with(warp::trace::named("Route: Update Stats"))
 }
 
 pub fn add_logs_to_stats(
