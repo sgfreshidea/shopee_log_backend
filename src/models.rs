@@ -274,7 +274,11 @@ pub async fn clear_db(statistics: &mut Statistics) {
         })
         .unwrap();
 
-        let path = crate::helpers::sanitize(&crate::helpers::current_time_string()) + ".json";
+        let path = crate::helpers::sanitize(
+            &("".to_owned()
+                + &statistics.main_stats.account_name
+                + &crate::helpers::current_time_string()),
+        ) + ".json";
 
         let mut new_file = File::create(path).unwrap();
         new_file.write_all(&content.into_bytes()).unwrap();
