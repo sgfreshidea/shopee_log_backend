@@ -277,6 +277,7 @@ pub async fn clear_db(statistics: &mut Statistics) {
         let path = crate::helpers::sanitize(
             &("".to_owned()
                 + &statistics.main_stats.account_name
+                + "_"
                 + &crate::helpers::current_time_string()),
         ) + ".json";
 
