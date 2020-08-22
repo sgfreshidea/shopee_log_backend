@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 use tokio::sync::RwLock;
 
@@ -15,7 +14,7 @@ type Account = String;
 type KeywordId = u64;
 type KeywordStats = HashMap<KeywordId, KeywordStatistics>;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Statistics {
     pub main_stats: MainStats,
     pub keyword_stats: KeywordStats,
@@ -240,49 +239,60 @@ struct BackupStatistics {
 //     None
 // }
 
-// pub async fn clear_database_after_getting_more_than_1GB(db: Db) {
-//     // As database keeeps growing we must keep memory usage in track
-//     // For this  we will check how much process is using memory
-//     // if its greator than zero we will clear it
+pub async fn clear_database_periodically(db: Db) {
+    println!("Waiting 6 hour to clear DB!");
+    use tokio::time::Duration;
 
-//     let mut statistics = *db;
-//     for st in statistics.as_mut() {
-//         clear_db(&mut st).await;
-//     }
-// }
+    tokio::time::delay_for(Duration::from_secs(6 * 60 * 60)).await;
 
-// pub async fn clear_db(statistics: &mut Statistics) {
-//     use std::borrow::Cow;
+    println!("Clearing Old Records!");
+    loop {
+        // As database keeeps growing we must keep memory usage in track
+        // For this  we will check how much process is using memory
+        // if its greator than zero we will clear it
+        let mut lock = db.write().await;
 
-//     #[derive(Debug, Deserialize, Serialize, Clone)]
-//     struct Backup<'a> {
-//         stats: Cow<'a, Stat>,
-//         keyword: Cow<'a, [Log]>,
-//     };
+        let vv = lock.values_mut();
 
-//     let mut lock = db.lock().await;
-//     let stats = lock.entry(account.clone()).or_insert(Stat::new());
+        for statistics in vv {
+            clear_db(statistics).await
+        }
+    }
+}
 
-//     let mut klock = keyword_db.lock().await;
-//     let kstats = klock.entry(account.clone()).or_insert(Vec::new());
+pub async fn clear_db(statistics: &mut Statistics) {
+    use std::borrow::Cow;
 
-//     // {
-//     //     let content = serde_json::to_string_pretty(&Backup {
-//     //         stats: Cow::Borrowed(&*stats),
-//     //         keyword: Cow::Borrowed(&*kstats),
-//     //     })
-//     //     .unwrap();
+    #[derive(Debug, Deserialize, Serialize, Clone)]
+    struct Backup<'a> {
+        stats: Cow<'a, Statistics>,
+    };
 
-//     //     let path = crate::helpers::sanitize(&crate::helpers::current_time_string()) + ".json";
+    {
+        let content = serde_json::to_string_pretty(&Backup {
+            stats: Cow::Borrowed(&*statistics),
+        })
+        .unwrap();
 
-//     //     let mut new_file = File::create(path).unwrap();
-//     //     new_file.write_all(&content.into_bytes()).unwrap();
-//     // }
+        let path = crate::helpers::sanitize(&crate::helpers::current_time_string()) + ".json";
 
-//     let current_stats_len = (*stats).logs.len();
+        let mut new_file = File::create(path).unwrap();
+        new_file.write_all(&content.into_bytes()).unwrap();
+    }
 
-//     // [1,2,3,4,5,6,7] to keep 2 elem drain 0..7-2
-//     if current_stats_len > 100 {
-//         (*stats).logs.drain(0..(current_stats_len - 100));
-//     }
-// }
+    let main_logs_len = statistics.main_stats.logs.len();
+
+    // [1,2,3,4,5,6,7] to keep 2 elem drain 0..7-2
+    if main_logs_len > 100 {
+        statistics.main_stats.logs.drain(0..(main_logs_len - 100));
+    }
+
+    let keyword_stats_hashmap = statistics.keyword_stats.values_mut();
+
+    for kstat in keyword_stats_hashmap {
+        let log_len = kstat.keyword_logs.len();
+        if log_len > 100 {
+            statistics.main_stats.logs.drain(0..(main_logs_len - 100));
+        }
+    }
+}

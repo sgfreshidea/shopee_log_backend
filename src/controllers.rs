@@ -1,3 +1,4 @@
+use crate::models::clear_db;
 use crate::models::{Db, KeywordStatistics, Log, Statistics, UpdateKeywordStat, UpdateStat};
 use serde_json::json;
 use serde_json::Value::Null;
@@ -22,8 +23,8 @@ pub async fn get_keyword_logs(
     if let Some(statistics) = lock.get(&account) {
         let keyword_stats = &statistics.keyword_stats;
 
-        if let Some(keyword_logs) = keyword_stats.get(&keyword_id) {
-            return Ok(json(keyword_logs));
+        if let Some(ks) = keyword_stats.get(&keyword_id) {
+            return Ok(json(&ks.keyword_logs));
         }
     }
 
@@ -34,13 +35,30 @@ pub async fn get_main_stats(account: String, db: Db) -> Result<impl warp::Reply,
     let lock = db.read().await;
     if let Some(statistics) = lock.get(&account) {
         let main_stats = &statistics.main_stats;
-        return Ok(json(main_stats));
+        let keyword_stats: Vec<_> = statistics
+            .keyword_stats
+            .values()
+            .map(|v| &v.stats)
+            .collect();
+
+        let ret = &json!({
+            "main_stats": main_stats,
+            "keyword_stats": keyword_stats
+        });
+
+        return Ok(json(ret));
     }
 
     Ok(json(&Null))
 }
 
 pub async fn clear_log(account: String, db: Db) -> Result<impl warp::Reply, Infallible> {
+    let mut lock = db.write().await;
+
+    if let Some(statistics) = lock.get_mut(&account) {
+        clear_db(statistics).await
+    }
+
     // For now just send success message
     Ok(json(&json!({"type": "success",})))
 }
@@ -51,6 +69,10 @@ pub async fn update_stats(
     db: Db,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.write().await;
+
+    if lock.get_mut(&account).is_none() {
+        lock.insert(account.clone(), Statistics::new(account.clone()));
+    }
 
     if let Some(statistics) = lock.get_mut(&account) {
         let mut main_stats = &mut statistics.main_stats;
@@ -67,8 +89,6 @@ pub async fn update_stats(
         if req.no_of_api_call_diff.is_some() {
             main_stats.no_api_calls += req.no_of_api_call_diff.unwrap();
         }
-    } else {
-        lock.insert(account.clone(), Statistics::new(account));
     }
 
     Ok(json(&json!({
@@ -82,6 +102,10 @@ pub async fn add_logs_to_stats(
     db: Db,
 ) -> Result<impl warp::Reply, Infallible> {
     let mut lock = db.write().await;
+
+    if lock.get_mut(&account).is_none() {
+        lock.insert(account.clone(), Statistics::new(account.clone()));
+    }
 
     if let Some(stats) = lock.get_mut(&account) {
         let main_stats = &mut stats.main_stats;

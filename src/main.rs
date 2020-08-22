@@ -60,18 +60,21 @@ fn run_server(config: &cli::Config) -> Result<(), String> {
         .init();
 
     let db = models::blank_db();
-    let api = routes::all(db);
+    let api = routes::all(db.clone());
 
     let fs = warp::fs::dir(config.html_path.to_owned());
 
     let routes = fs.or(api.with(warp::trace::request()));
 
-    let mut rt = tokio::runtime::Runtime::new().map_err(|_| "Couldn't start runtime")?;
-
     info!("Listening on port {}", port);
     info!("Serving {}", config.html_path);
 
-    rt.block_on(warp::serve(routes).run(([127, 0, 0, 1], port)));
+    let server = warp::serve(routes).run(([127, 0, 0, 1], port));
+    let clear_logs_future = crate::models::clear_database_periodically(db.clone());
+
+    let mut rt = tokio::runtime::Runtime::new().map_err(|_| "Error on tokio runtime".to_owned())?;
+
+    rt.block_on(async { tokio::join!(server, clear_logs_future) });
 
     Ok(())
 }
