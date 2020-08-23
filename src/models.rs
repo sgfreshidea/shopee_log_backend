@@ -284,12 +284,12 @@ pub async fn clear_db(statistics: &mut Statistics) {
         let mut new_file = File::create(path).unwrap();
         new_file.write_all(&content.into_bytes()).unwrap();
     }
-    
+
     {
         let main_logs_len = statistics.main_stats.logs.len();
 
-        // [1,2,3,4,5,6,7] to keep 2 elem drain 0..7-2
         if main_logs_len > 100 {
+            // [1,2,3,4,5,6,7] to keep 2 elem drain 0..(7-2)
             statistics.main_stats.logs.drain(0..(main_logs_len - 100));
         }
     }
