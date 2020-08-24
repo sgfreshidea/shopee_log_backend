@@ -240,13 +240,14 @@ struct BackupStatistics {
 // }
 
 pub async fn clear_database_periodically(db: Db) {
-    println!("Waiting 6 hour to clear DB!");
-    use tokio::time::Duration;
-
-    tokio::time::delay_for(Duration::from_secs(6 * 60 * 60)).await;
-
-    println!("Clearing Old Records!");
     loop {
+        println!("Waiting 6 hour to clear DB!");
+        use tokio::time::Duration;
+
+        tokio::time::delay_for(Duration::from_secs(6 * 60 * 60)).await;
+
+        println!("Clearing Old Records!");
+
         // As database keeeps growing we must keep memory usage in track
         // For this  we will check how much process is using memory
         // if its greator than zero we will clear it
