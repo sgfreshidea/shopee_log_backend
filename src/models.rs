@@ -285,6 +285,8 @@ pub async fn clear_db(statistics: &mut Statistics) {
         new_file.write_all(&content.into_bytes()).unwrap();
     }
 
+    println!("Backup done");
+
     {
         let main_logs_len = statistics.main_stats.logs.len();
 
@@ -293,6 +295,7 @@ pub async fn clear_db(statistics: &mut Statistics) {
             statistics.main_stats.logs.drain(0..(main_logs_len - 100));
         }
     }
+    println!("Main Lang Cleared");
 
     {
         let keyword_stats_hashmap = statistics.keyword_stats.values_mut();
@@ -300,8 +303,10 @@ pub async fn clear_db(statistics: &mut Statistics) {
         for kstat in keyword_stats_hashmap {
             let log_len = kstat.keyword_logs.len();
             if log_len > 100 {
-                statistics.main_stats.logs.drain(0..(log_len - 100));
+                kstat.keyword_logs.drain(0..(log_len - 100));
             }
         }
     }
+
+    println!("Keyword Static Cleared");
 }
