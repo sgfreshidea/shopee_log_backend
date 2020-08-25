@@ -191,9 +191,11 @@ impl KeywordStatistics {
 
             if input.r#type == "error" {
                 main_stats.error_counts += 1;
+                ks.stats.error_counts +=1;
             }
 
             main_stats.log_counts += 1;
+            ks.stats.log_counts += 1;
 
             ks.keyword_logs.push(input);
         }
@@ -288,16 +290,19 @@ pub async fn clear_db(statistics: &mut Statistics) {
 
     println!("Backup done");
 
+    let mut no_of_main_log_cleared = 0;
     {
         let main_logs_len = statistics.main_stats.logs.len();
 
         if main_logs_len > 100 {
             // [1,2,3,4,5,6,7] to keep 2 elem drain 0..(7-2)
             statistics.main_stats.logs.drain(0..(main_logs_len - 100));
+            no_of_main_log_cleared+=main_logs_len - 100;
         }
     }
     println!("Main Lang Cleared");
 
+    let mut no_of_keyword_drained = 0;
     {
         let keyword_stats_hashmap = statistics.keyword_stats.values_mut();
 
@@ -305,9 +310,10 @@ pub async fn clear_db(statistics: &mut Statistics) {
             let log_len = kstat.keyword_logs.len();
             if log_len > 100 {
                 kstat.keyword_logs.drain(0..(log_len - 100));
+                no_of_keyword_drained += log_len - 100;
             }
         }
     }
 
-    println!("Keyword Static Cleared");
+    println!("Keyword Static Cleared No of log cleared {}",no_of_keyword_drained);
 }
