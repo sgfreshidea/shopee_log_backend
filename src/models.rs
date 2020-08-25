@@ -191,7 +191,7 @@ impl KeywordStatistics {
 
             if input.r#type == "error" {
                 main_stats.error_counts += 1;
-                ks.stats.error_counts +=1;
+                ks.stats.error_counts += 1;
             }
 
             main_stats.log_counts += 1;
@@ -297,7 +297,7 @@ pub async fn clear_db(statistics: &mut Statistics) {
         if main_logs_len > 100 {
             // [1,2,3,4,5,6,7] to keep 2 elem drain 0..(7-2)
             statistics.main_stats.logs.drain(0..(main_logs_len - 100));
-            no_of_main_log_cleared+=main_logs_len - 100;
+            no_of_main_log_cleared += main_logs_len - 100;
         }
     }
     println!("Main Lang Cleared");
@@ -315,5 +315,8 @@ pub async fn clear_db(statistics: &mut Statistics) {
         }
     }
 
-    println!("Keyword Static Cleared No of log cleared {}",no_of_keyword_drained);
+    println!(
+        "Keyword Static Cleared \n No of log cleared {} \n No of mail log cleared {}",
+        no_of_keyword_drained, no_of_main_log_cleared
+    );
 }
