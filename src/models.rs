@@ -83,6 +83,7 @@ impl MainStats {
             running: false,
             no_api_calls: 0,
             log_counts: 0,
+            no_internal_api_calls: 0,
             started_at: crate::helpers::current_time_string(),
             last_updated_at: crate::helpers::current_time_string(),
             logs: Vec::new(),
@@ -195,6 +196,9 @@ impl KeywordStatistics {
                     ads_running: input.ads_running,
                     ads_position: input.ads_position,
                     current_price: input.current_price,
+                    is_max_price_reached: None,
+                    is_min_price_reached: None,
+                    max_expense_reached: None,
                 },
                 keyword_logs: Vec::with_capacity(1000),
             };
