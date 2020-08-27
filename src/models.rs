@@ -283,12 +283,12 @@ pub async fn clear_database_periodically(db: Db) {
         let vv = lock.values_mut();
 
         for statistics in vv {
-            clear_db(statistics).await
+            clear_db(statistics, 100).await
         }
     }
 }
 
-pub async fn clear_db(statistics: &mut Statistics) {
+pub async fn clear_db(statistics: &mut Statistics, count: usize) {
     use std::borrow::Cow;
 
     #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -317,12 +317,21 @@ pub async fn clear_db(statistics: &mut Statistics) {
 
     let mut no_of_main_log_cleared = 0;
     {
+        if count == 0 {
+            let ms = &mut statistics.main_stats;
+
+            ms.error_counts = 0;
+            ms.log_counts = 0;
+            ms.no_api_calls = 0;
+            ms.no_internal_api_calls = 0;
+        }
+
         let main_logs_len = statistics.main_stats.logs.len();
 
-        if main_logs_len > 100 {
+        if main_logs_len > count {
             // [1,2,3,4,5,6,7] to keep 2 elem drain 0..(7-2)
-            statistics.main_stats.logs.drain(0..(main_logs_len - 100));
-            no_of_main_log_cleared += main_logs_len - 100;
+            statistics.main_stats.logs.drain(0..(main_logs_len - count));
+            no_of_main_log_cleared += main_logs_len - count;
         }
     }
     println!("Main Lang Cleared");
@@ -332,10 +341,17 @@ pub async fn clear_db(statistics: &mut Statistics) {
         let keyword_stats_hashmap = statistics.keyword_stats.values_mut();
 
         for kstat in keyword_stats_hashmap {
+            if count == 0 {
+                let ss = &mut kstat.stats;
+                ss.error_counts = 0;
+                ss.log_counts = 0;
+                ss.last_updated_at = crate::helpers::current_time_string();
+            }
+
             let log_len = kstat.keyword_logs.len();
-            if log_len > 100 {
-                kstat.keyword_logs.drain(0..(log_len - 100));
-                no_of_keyword_drained += log_len - 100;
+            if log_len > count {
+                kstat.keyword_logs.drain(0..(log_len - count));
+                no_of_keyword_drained += log_len - count;
             }
         }
     }

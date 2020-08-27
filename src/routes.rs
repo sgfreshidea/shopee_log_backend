@@ -5,6 +5,7 @@ use warp::Filter;
 pub fn all(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     list_accounts(db.clone())
         .or(clear_stat(db.clone()))
+                .or(clear_stat_full(db.clone()))
         .or(get_main_stats(db.clone()))
         .or(update_stats(db.clone()))
         .or(add_logs_to_stats(db.clone()))
@@ -32,6 +33,16 @@ pub fn clear_stat(
         .and(warp::get())
         .and(with_db(db))
         .and_then(controllers::clear_log)
+        .with(warp::trace::named("Route:Index Stats"))
+}
+
+pub fn clear_stat_full(
+    db: Db,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!(String / "clear_log_full")
+        .and(warp::get())
+        .and(with_db(db))
+        .and_then(controllers::clear_log_full)
         .with(warp::trace::named("Route:Index Stats"))
 }
 

@@ -56,7 +56,18 @@ pub async fn clear_log(account: String, db: Db) -> Result<impl warp::Reply, Infa
     let mut lock = db.write().await;
 
     if let Some(statistics) = lock.get_mut(&account) {
-        clear_db(statistics).await
+        clear_db(statistics, 100).await
+    }
+
+    // For now just send success message
+    Ok(json(&json!({"type": "success",})))
+}
+
+pub async fn clear_log_full(account: String, db: Db) -> Result<impl warp::Reply, Infallible> {
+    let mut lock = db.write().await;
+
+    if let Some(statistics) = lock.get_mut(&account) {
+        clear_db(statistics, 0).await
     }
 
     // For now just send success message
