@@ -61,6 +61,9 @@ pub struct MainStats {
     // Total api calls made by other bot .
     pub no_api_calls: u64,
 
+    // API calls used for this bot
+    pub no_internal_api_calls: u64,
+
     // When the other bot was started?
     pub started_at: String,
 
@@ -118,6 +121,9 @@ pub struct KeywordStat {
     pub ads_running: Option<bool>,
     pub ads_position: Option<u64>,
     pub current_price: Option<f64>,
+    pub is_max_price_reached: Option<bool>,
+    pub is_min_price_reached: Option<bool>,
+    pub max_expense_reached: Option<bool>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -132,6 +138,9 @@ pub struct UpdateKeywordStat {
     pub ads_running: Option<bool>,
     pub ads_position: Option<u64>,
     pub logs: Option<Vec<Log>>,
+    pub is_max_price_reached: Option<bool>,
+    pub is_min_price_reached: Option<bool>,
+    pub max_expense_reached: Option<bool>,
 }
 
 impl KeywordStatistics {
@@ -153,8 +162,20 @@ impl KeywordStatistics {
                 ks.stats.ads_running = input.ads_running
             }
 
+            if input.is_max_price_reached.is_some() {
+                ks.stats.is_max_price_reached = input.is_max_price_reached
+            }
+
+            if input.is_min_price_reached.is_some() {
+                ks.stats.is_min_price_reached = input.is_min_price_reached
+            }
+
             if input.ads_position.is_some() {
                 ks.stats.ads_position = input.ads_position
+            }
+
+            if input.max_expense_reached.is_some() {
+                ks.stats.max_expense_reached = input.max_expense_reached
             }
 
             if let Some(cp) = input.current_price {
