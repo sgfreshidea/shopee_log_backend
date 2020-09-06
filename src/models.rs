@@ -289,31 +289,31 @@ pub async fn clear_database_periodically(db: Db) {
 }
 
 pub async fn clear_db(statistics: &mut Statistics, count: usize) {
-    use std::borrow::Cow;
+    // use std::borrow::Cow;
 
-    #[derive(Debug, Deserialize, Serialize, Clone)]
-    struct Backup<'a> {
-        stats: Cow<'a, Statistics>,
-    };
+    // #[derive(Debug, Deserialize, Serialize, Clone)]
+    // struct Backup<'a> {
+    //     stats: Cow<'a, Statistics>,
+    // };
 
-    {
-        let content = serde_json::to_string_pretty(&Backup {
-            stats: Cow::Borrowed(&*statistics),
-        })
-        .unwrap();
+    // {
+    //     let content = serde_json::to_string_pretty(&Backup {
+    //         stats: Cow::Borrowed(&*statistics),
+    //     })
+    //     .unwrap();
 
-        let path = crate::helpers::sanitize(
-            &("".to_owned()
-                + &statistics.main_stats.account_name
-                + "_"
-                + &crate::helpers::current_time_string()),
-        ) + ".json";
+    //     let path = crate::helpers::sanitize(
+    //         &("".to_owned()
+    //             + &statistics.main_stats.account_name
+    //             + "_"
+    //             + &crate::helpers::current_time_string()),
+    //     ) + ".json";
 
-        let mut new_file = File::create(path).unwrap();
-        new_file.write_all(&content.into_bytes()).unwrap();
-    }
+    //     let mut new_file = File::create(path).unwrap();
+    //     new_file.write_all(&content.into_bytes()).unwrap();
+    // }
 
-    println!("Backup done");
+    // println!("Backup done");
 
     let mut no_of_main_log_cleared = 0;
     {
