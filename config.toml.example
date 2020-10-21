@@ -1,0 +1,4 @@
+action="RUN_DIRECT"
+#action="RUN"
+
+html_path="C:\\Users\\demo\\Desktop\\froontend\\out"

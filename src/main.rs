@@ -19,6 +19,7 @@ fn main() {
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 
     tracing_subscriber::fmt()
+        .with_env_filter("shopee_logs_collector=trace")
         .with_writer(non_blocking)
         .with_span_events(FmtSpan::CLOSE)
         .init();
@@ -50,18 +51,21 @@ fn run_platform() -> Result<(), Box<dyn std::error::Error>> {
 fn run_platform() -> Result<(), Box<dyn std::error::Error>> {
     let config = cli::get_config();
 
-    info!(
-        "Run As Service: {} , Register Service: {}",
-        config.run_as_service, config.register_service
-    );
+    info!("Action: {}", config.action);
 
-    if config.run_as_service {
-        system_service::run()?;
-    } else if config.register_service {
-        system_service::install_service()?;
-    } else {
-        println!("Running Directly");
-        run_server(None)?;
+    match config.action.as_ref() {
+        "REGISTER_SERVICE" => {
+            system_service::install_service()?;
+        }
+
+        "RUN_DIRECT" => {
+            run_server(None)?;
+        }
+
+        _ => {
+            //std::process::Command::new("")
+            system_service::run()?;
+        }
     }
 
     info!("Exiting run_platform.");
