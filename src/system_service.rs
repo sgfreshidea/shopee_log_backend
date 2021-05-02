@@ -10,7 +10,7 @@ use windows_service::{
     service_control_handler::{self, ServiceControlHandlerResult},
     service_dispatcher, Result,
 };
-const SERVICE_NAME: &str = "shopee_bot_log_collector";
+const SERVICE_NAME: &str = "shopee_service";
 const SERVICE_TYPE: ServiceType = ServiceType::OWN_PROCESS;
 
 pub fn run() -> Result<()> {
@@ -77,7 +77,7 @@ pub fn run_service() -> Result<()> {
 
     info!("Booting the server from service");
 
-    crate::run_server(Some(shutdown_rx)).unwrap();
+    crate::utils::run_server(Some(shutdown_rx), true).unwrap();
 
     info!("Closing the server as it seems warp server has closed due to panic?");
 
@@ -107,7 +107,7 @@ pub fn install_service() -> Result<()> {
     info!("Starting to install service");
     let service_binary_path = ::std::env::current_exe()
         .unwrap()
-        .with_file_name("shopee_logs_collector.exe");
+        .with_file_name("shopee_service.exe");
 
     let service_binary_str = service_binary_path.to_string_lossy();
 
